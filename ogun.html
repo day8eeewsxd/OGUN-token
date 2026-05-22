@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>$OGUN — The God of Iron on Solana</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #D4A017;
+    --gold-light: #F5C842;
+    --gold-dim: #8B6914;
+    --blood: #8B1A1A;
+    --blood-bright: #C0392B;
+    --iron: #1a1a1a;
+    --iron-mid: #2a2622;
+    --iron-light: #3d3730;
+    --ash: #b0a090;
+    --white: #F5EDD8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--iron);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: crosshair;
+  }
+
+  /* NOISE TEXTURE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 3rem;
+    background: linear-gradient(to bottom, rgba(26,26,26,0.95), transparent);
+    border-bottom: 0.5px solid rgba(212,160,23,0.15);
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.1rem;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-decoration: none;
+  }
+
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ash);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--gold); }
+
+  .nav-cta {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--iron);
+    background: var(--gold);
+    padding: 0.5rem 1.2rem;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .nav-cta:hover { background: var(--gold-light); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    text-align: center;
+    padding: 6rem 2rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 60%, rgba(139,26,26,0.18) 0%, transparent 70%),
+      radial-gradient(ellipse 80% 40% at 50% 100%, rgba(212,160,23,0.08) 0%, transparent 60%),
+      var(--iron);
+  }
+
+  .hero-lines {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(212,160,23,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212,160,23,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+  }
+
+  .hero-content { position: relative; z-index: 2; }
+
+  .hero-eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-symbol {
+    font-size: 6rem;
+    line-height: 1;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.8s ease 0.1s both;
+    filter: drop-shadow(0 0 40px rgba(212,160,23,0.3));
+  }
+
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(3.5rem, 10vw, 7rem);
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    text-shadow: 0 0 80px rgba(212,160,23,0.3), 0 2px 0 rgba(0,0,0,0.5);
+    margin-bottom: 0.3rem;
+    animation: fadeUp 0.8s ease 0.2s both;
+  }
+
+  .hero-subtitle-line {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(0.8rem, 2vw, 1rem);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ash);
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease 0.3s both;
+  }
+
+  .hero-desc {
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--ash);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    animation: fadeUp 0.8s ease 0.4s both;
+  }
+
+  .hero-desc strong {
+    color: var(--white);
+    font-weight: 500;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.8s ease 0.5s both;
+  }
+
+  .btn-primary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--iron);
+    background: var(--gold);
+    padding: 0.9rem 2.2rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.15);
+    transform: translateX(-100%);
+    transition: transform 0.3s;
+  }
+  .btn-primary:hover::after { transform: translateX(0); }
+
+  .btn-secondary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: transparent;
+    padding: 0.9rem 2.2rem;
+    text-decoration: none;
+    border: 1px solid rgba(212,160,23,0.4);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover {
+    border-color: var(--gold);
+    background: rgba(212,160,23,0.06);
+  }
+
+  .hero-divider {
+    width: 1px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, var(--gold-dim), transparent);
+    margin: 3rem auto 0;
+    animation: fadeUp 0.8s ease 0.6s both;
+  }
+
+  /* STATS BAND */
+  .stats-band {
+    border-top: 0.5px solid rgba(212,160,23,0.15);
+    border-bottom: 0.5px solid rgba(212,160,23,0.15);
+    background: rgba(212,160,23,0.04);
+    padding: 2rem 3rem;
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+    flex-wrap: wrap;
+  }
+
+  .stat-item { text-align: center; }
+  .stat-val {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.6rem;
+    color: var(--gold);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+  .stat-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ash);
+    font-family: 'Cinzel', serif;
+  }
+
+  /* SECTIONS */
+  section { padding: 6rem 2rem; }
+
+  .container { max-width: 900px; margin: 0 auto; }
+  .container-wide { max-width: 1100px; margin: 0 auto; }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 0.5px;
+    background: rgba(212,160,23,0.2);
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-title span { color: var(--gold); }
+
+  /* STORY */
+  .story { background: var(--iron-mid); }
+
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+  }
+
+  .story-text p {
+    font-size: 0.95rem;
+    line-height: 1.9;
+    color: var(--ash);
+    margin-bottom: 1.2rem;
+  }
+
+  .story-text p strong { color: var(--white); font-weight: 500; }
+
+  .story-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .lore-card {
+    border: 0.5px solid rgba(212,160,23,0.2);
+    background: rgba(212,160,23,0.04);
+    padding: 1.2rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .lore-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--gold);
+  }
+  .lore-card-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.4rem;
+  }
+  .lore-card-text {
+    font-size: 0.85rem;
+    color: var(--ash);
+    line-height: 1.6;
+  }
+
+  /* TOKENOMICS */
+  .tokenomics { background: var(--iron); }
+
+  .token-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1px;
+    border: 0.5px solid rgba(212,160,23,0.2);
+    margin-bottom: 3rem;
+    overflow: hidden;
+  }
+
+  .token-cell {
+    background: var(--iron-mid);
+    padding: 2rem 1.5rem;
+    text-align: center;
+    border: 0.5px solid rgba(212,160,23,0.1);
+    transition: background 0.2s;
+  }
+  .token-cell:hover { background: var(--iron-light); }
+
+  .token-cell-val {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.3rem;
+    color: var(--gold);
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  .token-cell-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ash);
+  }
+
+  /* DISTRIBUTION BAR */
+  .dist-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--ash);
+    margin-bottom: 1rem;
+  }
+
+  .dist-bar {
+    display: flex;
+    height: 12px;
+    overflow: hidden;
+    border-radius: 0;
+    margin-bottom: 1.5rem;
+    gap: 2px;
+  }
+  .dist-seg { height: 100%; transition: opacity 0.2s; }
+  .dist-seg:hover { opacity: 0.8; }
+
+  .dist-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+  }
+  .dist-item { display: flex; align-items: center; gap: 0.5rem; }
+  .dist-dot { width: 8px; height: 8px; flex-shrink: 0; }
+  .dist-item-label {
+    font-size: 0.8rem;
+    color: var(--ash);
+  }
+  .dist-item-pct {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    color: var(--gold);
+    margin-left: 0.2rem;
+  }
+
+  /* HOW TO BUY */
+  .how { background: var(--iron-mid); }
+
+  .steps { display: flex; flex-direction: column; gap: 0; }
+
+  .step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 2rem;
+    padding: 2rem 0;
+    border-bottom: 0.5px solid rgba(212,160,23,0.1);
+    align-items: start;
+  }
+  .step:last-child { border-bottom: none; }
+
+  .step-num-wrap { text-align: center; }
+  .step-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 2rem;
+    color: rgba(212,160,23,0.25);
+    line-height: 1;
+    display: block;
+  }
+
+  .step-content-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+  .step-content-text {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--ash);
+  }
+  .step-content-text a {
+    color: var(--gold);
+    text-decoration: none;
+  }
+  .step-content-text a:hover { text-decoration: underline; }
+
+  .ca-box {
+    margin-top: 1rem;
+    background: rgba(212,160,23,0.06);
+    border: 0.5px solid rgba(212,160,23,0.25);
+    padding: 0.8rem 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .ca-text {
+    font-family: 'Inter', monospace;
+    font-size: 0.78rem;
+    color: var(--gold-light);
+    word-break: break-all;
+  }
+  .ca-copy {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--iron);
+    background: var(--gold);
+    border: none;
+    padding: 0.4rem 0.8rem;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.2s;
+  }
+  .ca-copy:hover { background: var(--gold-light); }
+
+  /* COMMUNITY */
+  .community { background: var(--iron); text-align: center; }
+
+  .community-quote {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-weight: 400;
+    color: var(--white);
+    line-height: 1.5;
+    max-width: 680px;
+    margin: 0 auto 3rem;
+    font-style: italic;
+  }
+  .community-quote span { color: var(--gold); }
+
+  .social-links {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .social-btn {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ash);
+    border: 0.5px solid rgba(212,160,23,0.3);
+    padding: 0.8rem 1.8rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .social-btn:hover {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: rgba(212,160,23,0.05);
+  }
+
+  /* FOOTER */
+  footer {
+    border-top: 0.5px solid rgba(212,160,23,0.15);
+    padding: 2rem 3rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: rgba(0,0,0,0.3);
+  }
+
+  .footer-logo {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.9rem;
+    color: var(--gold-dim);
+  }
+
+  .footer-disc {
+    font-size: 0.72rem;
+    color: rgba(176,160,144,0.5);
+    max-width: 500px;
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* MOBILE */
+  @media (max-width: 700px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { display: none; }
+    .stats-band { gap: 2rem; padding: 2rem 1.5rem; }
+    .story-grid { grid-template-columns: 1fr; gap: 2rem; }
+    .step { grid-template-columns: 50px 1fr; gap: 1rem; }
+    footer { flex-direction: column; text-align: center; }
+    .footer-disc { text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">⚔ OGUN</a>
+  <ul class="nav-links">
+    <li><a href="#story">Lore</a></li>
+    <li><a href="#tokenomics">Tokenomics</a></li>
+    <li><a href="#buy">How to Buy</a></li>
+    <li><a href="#community">Community</a></li>
+  </ul>
+  <a href="#buy" class="nav-cta">Buy $OGUN</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-lines"></div>
+  <div class="hero-content">
+    <p class="hero-eyebrow">Solana · Fair Launch · Community Owned</p>
+    <div class="hero-symbol">⚔️</div>
+    <h1 class="hero-title">$OGUN</h1>
+    <p class="hero-subtitle-line">The African God of Iron &amp; War</p>
+    <p class="hero-desc">
+      They gave us dog coins. They gave us frog coins.<br>
+      <strong>We give them a GOD.</strong><br><br>
+      The Yoruba deity of iron, victory, and war has arrived on Solana.
+      1.4 billion Africans just entered the chat.
+    </p>
+    <div class="hero-buttons">
+      <a href="#buy" class="btn-primary">Buy $OGUN Now</a>
+      <a href="#story" class="btn-secondary">Read the Lore</a>
+    </div>
+    <div class="hero-divider"></div>
+  </div>
+</section>
+
+<!-- STATS BAND -->
+<div class="stats-band">
+  <div class="stat-item">
+    <span class="stat-val">100M</span>
+    <span class="stat-label">Total Supply</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-val">0%</span>
+    <span class="stat-label">Dev Allocation</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-val">100%</span>
+    <span class="stat-label">Fair Launch</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-val">1.4B</span>
+    <span class="stat-label">Africans Ready</span>
+  </div>
+  <div class="stat-item">
+    <span class="stat-val">∞</span>
+    <span class="stat-label">God Mode</span>
+  </div>
+</div>
+
+<!-- STORY -->
+<section class="story" id="story">
+  <div class="container">
+    <div class="story-grid">
+      <div class="story-text">
+        <div class="section-label">The Lore</div>
+        <h2 class="section-title">Born from <span>Iron.</span><br>Built for War.</h2>
+        <p>
+          In Yoruba tradition, <strong>OGUN</strong> is the primordial deity of iron, labour, and war.
+          He is the god who clears the path with his machete so that others may walk through.
+        </p>
+        <p>
+          He does not beg. He does not negotiate. He <strong>conquers.</strong>
+        </p>
+        <p>
+          Now he comes to Solana — not as a meme, but as a movement.
+          Africa's first deity memecoin. Built by believers. Feared by rugs.
+        </p>
+        <p style="font-family: 'Cinzel', serif; color: var(--gold); font-size: 0.9rem; margin-top: 1.5rem;">
+          Ire o. 🙏
+        </p>
+      </div>
+      <div class="story-visual">
+        <div class="lore-card">
+          <div class="lore-card-title">⚔ Domain</div>
+          <div class="lore-card-text">Iron, war, labour, hunting, and technology. The forge and the battlefield.</div>
+        </div>
+        <div class="lore-card">
+          <div class="lore-card-title">🌍 Origin</div>
+          <div class="lore-card-text">Yoruba mythology — West Africa. One of the most powerful orishas in the pantheon.</div>
+        </div>
+        <div class="lore-card">
+          <div class="lore-card-title">🔥 Mission</div>
+          <div class="lore-card-text">To put Africa on the blockchain map. Culture-driven. Community-owned. No rugs.</div>
+        </div>
+        <div class="lore-card">
+          <div class="lore-card-title">💎 Promise</div>
+          <div class="lore-card-text">Fair launch. No dev wallet. No presale. OGUN clears the path — we walk through together.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOKENOMICS -->
+<section class="tokenomics" id="tokenomics">
+  <div class="container">
+    <div class="section-label">Tokenomics</div>
+    <h2 class="section-title">Clean. Fair. <span>Unruggable.</span></h2>
+
+    <div class="token-grid">
+      <div class="token-cell">
+        <span class="token-cell-val">$OGUN</span>
+        <span class="token-cell-label">Ticker</span>
+      </div>
+      <div class="token-cell">
+        <span class="token-cell-val">100M</span>
+        <span class="token-cell-label">Total Supply</span>
+      </div>
+      <div class="token-cell">
+        <span class="token-cell-val">6</span>
+        <span class="token-cell-label">Decimals</span>
+      </div>
+      <div class="token-cell">
+        <span class="token-cell-val">0%</span>
+        <span class="token-cell-label">Dev Wallet</span>
+      </div>
+      <div class="token-cell">
+        <span class="token-cell-val">Solana</span>
+        <span class="token-cell-label">Blockchain</span>
+      </div>
+      <div class="token-cell">
+        <span class="token-cell-val">Burned</span>
+        <span class="token-cell-label">LP Tokens</span>
+      </div>
+    </div>
+
+    <div class="dist-title">Token Distribution</div>
+    <div class="dist-bar">
+      <div class="dist-seg" style="width:80%; background: var(--gold);"></div>
+      <div class="dist-seg" style="width:10%; background: var(--blood-bright);"></div>
+      <div class="dist-seg" style="width:10%; background: var(--iron-light); border: 0.5px solid rgba(212,160,23,0.2);"></div>
+    </div>
+    <div class="dist-legend">
+      <div class="dist-item">
+        <div class="dist-dot" style="background: var(--gold);"></div>
+        <span class="dist-item-label">Liquidity Pool</span>
+        <span class="dist-item-pct">80%</span>
+      </div>
+      <div class="dist-item">
+        <div class="dist-dot" style="background: var(--blood-bright);"></div>
+        <span class="dist-item-label">Community Rewards</span>
+        <span class="dist-item-pct">10%</span>
+      </div>
+      <div class="dist-item">
+        <div class="dist-dot" style="background: var(--iron-light); border: 0.5px solid rgba(212,160,23,0.3);"></div>
+        <span class="dist-item-label">Marketing</span>
+        <span class="dist-item-pct">10%</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO BUY -->
+<section class="how" id="buy">
+  <div class="container">
+    <div class="section-label">How to Buy</div>
+    <h2 class="section-title">Join the <span>War.</span></h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num-wrap"><span class="step-num">01</span></div>
+        <div>
+          <div class="step-content-title">Get a Solana Wallet</div>
+          <div class="step-content-text">
+            Download <a href="https://phantom.app" target="_blank">Phantom</a> or <a href="https://solflare.com" target="_blank">Solflare</a> on your phone or browser. Create a new wallet and save your seed phrase somewhere safe. Never share it.
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num-wrap"><span class="step-num">02</span></div>
+        <div>
+          <div class="step-content-title">Buy Solana (SOL)</div>
+          <div class="step-content-text">
+            Fund your wallet with SOL from any exchange — Binance, Coinbase, or Bybit. Transfer SOL to your wallet address. Even $5 worth is enough to get started.
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num-wrap"><span class="step-num">03</span></div>
+        <div>
+          <div class="step-content-title">Swap for $OGUN</div>
+          <div class="step-content-text">
+            Go to <a href="https://jup.ag" target="_blank">Jupiter (jup.ag)</a> or <a href="https://raydium.io" target="_blank">Raydium</a>. Paste the $OGUN contract address below. Set slippage to 10-15% and swap your SOL for $OGUN.
+          </div>
+          <div class="ca-box">
+            <span class="ca-text" id="ca-address">Contract address will appear here after launch</span>
+            <button class="ca-copy" onclick="copyCA()">Copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num-wrap"><span class="step-num">04</span></div>
+        <div>
+          <div class="step-content-title">Hold &amp; Spread the Word</div>
+          <div class="step-content-text">
+            Welcome to the war party. Join our Telegram, follow us on X, and tell your people. OGUN grows through community. Every holder is a warrior.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMMUNITY -->
+<section class="community" id="community">
+  <div class="container">
+    <div class="section-label" style="justify-content: center;">Community</div>
+    <blockquote class="community-quote">
+      "While others launch <span>animals</span> — we launch <span>Gods.</span>"
+    </blockquote>
+    <div class="social-links">
+      <a href="#" class="social-btn">✕ Twitter / X</a>
+      <a href="#" class="social-btn">✈ Telegram</a>
+      <a href="https://dexscreener.com" target="_blank" class="social-btn">📊 Dexscreener</a>
+      <a href="https://pump.fun" target="_blank" class="social-btn">🚀 Pump.fun</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">⚔ $OGUN</div>
+  <p class="footer-disc">
+    $OGUN is a memecoin with no intrinsic value or financial return expectation. 
+    This is not financial advice. Crypto is volatile — only invest what you can afford to lose completely. 
+    Ire o. 🙏
+  </p>
+</footer>
+
+<script>
+function copyCA() {
+  const addr = document.getElementById('ca-address').textContent;
+  navigator.clipboard.writeText(addr).then(() => {
+    const btn = document.querySelector('.ca-copy');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 2000);
+  });
+}
+</script>
+
+</body>
+</html>
